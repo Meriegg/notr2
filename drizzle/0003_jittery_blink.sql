@@ -1,0 +1,1 @@
+ALTER TABLE "auth_verification_codes" ADD COLUMN "alreadyUsed" boolean DEFAULT false;

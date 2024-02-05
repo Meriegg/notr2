@@ -1,0 +1,1 @@
+ALTER TABLE "auth_verification_codes" ALTER COLUMN "expiresOn" SET DEFAULT now();
