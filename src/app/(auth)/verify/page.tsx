@@ -52,7 +52,7 @@ const Page = ({
 
           const cookieStore = cookies();
 
-          cookieStore.set("auth-token", res.sessionToken, {
+          cookieStore.set("auth-token", res.authToken, {
             httpOnly: true,
             secure: env.NODE_ENV === "production" ? true : false,
             maxAge: 60 * 60 * 6,

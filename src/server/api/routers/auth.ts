@@ -5,6 +5,8 @@ import { eq, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { v4 as uuid } from "uuid";
 import { sendVerificationCode } from "~/server/utils/auth/send-verification-code";
+import generateKeyPair from "~/server/utils/crypto/generate-key-pair";
+import createSignedString from "~/server/utils/crypto/create-signed-string";
 
 export const authRouter = createTRPCRouter({
   signUp: publicProcedure
@@ -105,14 +107,20 @@ export const authRouter = createTRPCRouter({
 
       const sessionToken = uuid();
 
+      const keypair = generateKeyPair();
+      const signedSessionToken = createSignedString(sessionToken, keypair);
+
+      const authToken = `${sessionToken}:${signedSessionToken.signature}`;
+
       // 6 hours into the future
       const sessionExpirationDate = new Date(Date.now() + 6 * 3600000);
       await db.insert(userSessions).values({
         sessionToken,
         userId,
         expiresOn: sessionExpirationDate,
+        publicVerificationKey: signedSessionToken.publicKey,
       });
 
-      return { sessionToken };
+      return { authToken };
     }),
 });

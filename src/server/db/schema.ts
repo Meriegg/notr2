@@ -11,10 +11,12 @@ export const users = pgTable(
   "users",
   {
     id: uuid("id").defaultRandom().primaryKey(),
-    username: varchar("name"),
+    username: varchar("name").notNull(),
     email: varchar("email", {
       length: 128,
-    }).unique(),
+    })
+      .unique()
+      .notNull(),
     verifiedEmails: varchar("verifiedEmails").array(),
   },
   (users) => {
@@ -26,9 +28,11 @@ export const authVerificationCodes = pgTable(
   "auth_verification_codes",
   {
     id: uuid("id").defaultRandom().primaryKey(),
-    code: varchar("code", { length: 6 }).unique(),
-    userId: uuid("userId").references(() => users.id),
-    expiresOn: timestamp("expiresOn").defaultNow(),
+    code: varchar("code", { length: 6 }).unique().notNull(),
+    userId: uuid("userId")
+      .references(() => users.id)
+      .notNull(),
+    expiresOn: timestamp("expiresOn").defaultNow().notNull(),
     alreadyUsed: boolean("alreadyUsed").default(false),
   },
   (authVerificationCodes) => {
@@ -44,10 +48,13 @@ export const userSessions = pgTable(
   "user_sessions",
   {
     id: uuid("id").defaultRandom().primaryKey(),
-    sessionToken: varchar("sessionToken").unique(),
-    expiresOn: timestamp("expiresOn"),
+    sessionToken: varchar("sessionToken").unique().notNull(),
+    expiresOn: timestamp("expiresOn").notNull(),
     createdOn: timestamp("createdOn").defaultNow(),
-    userId: uuid("userId").references(() => users.id),
+    userId: uuid("userId")
+      .references(() => users.id)
+      .notNull(),
+    publicVerificationKey: varchar("publicVerificationKey").notNull(),
   },
   (userSessions) => {
     return {
