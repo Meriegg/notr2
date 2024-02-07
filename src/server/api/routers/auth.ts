@@ -1,6 +1,11 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "../trpc";
-import { authVerificationCodes, userSessions, users } from "~/server/db/schema";
+import {
+  authVerificationCodes,
+  userSessions,
+  users,
+  verifiedEmails,
+} from "~/server/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { v4 as uuid } from "uuid";
@@ -42,7 +47,10 @@ export const authRouter = createTRPCRouter({
         });
       }
 
-      await sendVerificationCode({ userId: newUser.userId });
+      await sendVerificationCode({
+        userId: newUser.userId,
+        verifiedEmail: email,
+      });
 
       return newUser;
     }),
@@ -64,7 +72,10 @@ export const authRouter = createTRPCRouter({
         });
       }
 
-      await sendVerificationCode({ userId: existingUser.id });
+      await sendVerificationCode({
+        userId: existingUser.id,
+        verifiedEmail: email,
+      });
 
       return { userId: existingUser.id };
     }),
@@ -120,6 +131,20 @@ export const authRouter = createTRPCRouter({
         expiresOn: sessionExpirationDate,
         publicVerificationKey: signedSessionToken.publicKey,
       });
+
+      if (existingCode.verifiedEmail) {
+        const [existingVerifiedEmail] = await db
+          .select()
+          .from(verifiedEmails)
+          .where(eq(verifiedEmails.email, existingCode.verifiedEmail));
+
+        if (!existingVerifiedEmail) {
+          await db.insert(verifiedEmails).values({
+            email: existingCode.verifiedEmail,
+            userId: existingCode.userId,
+          });
+        }
+      }
 
       return { authToken };
     }),

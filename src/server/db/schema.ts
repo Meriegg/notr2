@@ -1,3 +1,4 @@
+import { relations } from "drizzle-orm";
 import {
   pgTable,
   varchar,
@@ -17,12 +18,23 @@ export const users = pgTable(
     })
       .unique()
       .notNull(),
-    verifiedEmails: varchar("verifiedEmails").array(),
   },
   (users) => {
     return { emailIndex: uniqueIndex("email_index").on(users.email) };
   },
 );
+
+export const userRelations = relations(users, ({ many }) => ({
+  notes: many(notes),
+  folders: many(folders),
+}));
+
+export const verifiedEmails = pgTable("verified_emails", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  email: varchar("email").unique(),
+  userId: uuid("userId").references(() => users.id),
+  verifiedOn: timestamp("verifiedOn").defaultNow(),
+});
 
 export const authVerificationCodes = pgTable(
   "auth_verification_codes",
@@ -34,6 +46,7 @@ export const authVerificationCodes = pgTable(
       .notNull(),
     expiresOn: timestamp("expiresOn").defaultNow().notNull(),
     alreadyUsed: boolean("alreadyUsed").default(false),
+    verifiedEmail: varchar("verifiedEmail"),
   },
   (authVerificationCodes) => {
     return {
@@ -64,3 +77,43 @@ export const userSessions = pgTable(
     };
   },
 );
+
+export const folders = pgTable("folders", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  name: varchar("name").notNull(),
+  parentFolderId: uuid("folderId"),
+  userId: uuid("userId").notNull(),
+  createdOn: timestamp("createdOn").defaultNow(),
+});
+
+export const foldersRelations = relations(folders, ({ one }) => ({
+  parentFolder: one(folders, {
+    references: [folders.id],
+    fields: [folders.parentFolderId],
+  }),
+  user: one(users, {
+    references: [users.id],
+    fields: [folders.userId],
+  }),
+}));
+
+export const notes = pgTable("notes", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  title: varchar("title").notNull(),
+  content: varchar("content").notNull(),
+  tags: varchar("tags").array(),
+  folderId: uuid("folderId").references(() => folders.id),
+  userId: uuid("userId").notNull(),
+  createdOn: timestamp("createdOn").defaultNow(),
+});
+
+export const notesRelations = relations(notes, ({ one }) => ({
+  user: one(users, {
+    references: [users.id],
+    fields: [notes.userId],
+  }),
+  folder: one(folders, {
+    references: [folders.id],
+    fields: [notes.folderId],
+  }),
+}));

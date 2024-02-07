@@ -2,7 +2,13 @@ import { db } from "~/server/db";
 import { generateAuthCode } from "./generate-code";
 import { authVerificationCodes } from "~/server/db/schema";
 
-export const sendVerificationCode = async ({ userId }: { userId: string }) => {
+export const sendVerificationCode = async ({
+  userId,
+  verifiedEmail,
+}: {
+  userId: string;
+  verifiedEmail?: string;
+}) => {
   const authCode = generateAuthCode();
 
   // 15 minutes into the future
@@ -11,6 +17,7 @@ export const sendVerificationCode = async ({ userId }: { userId: string }) => {
     code: authCode.codeStr,
     userId: userId,
     expiresOn: codeExpirationDate,
+    verifiedEmail,
   });
 
   return { authCode };

@@ -74,12 +74,18 @@ export const getSession = async () => {
         message: "User does not exist.",
       };
     }
+    if (!data?.user_sessions || !data?.users) {
+      return {
+        error: true,
+        message: "Invalid data.",
+      };
+    }
 
     return {
-      session: data.user_sessions,
-      userData: data.users,
+      session: data.user_sessions!,
+      userData: data.users!,
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error(error);
 
     return {
