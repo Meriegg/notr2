@@ -3,7 +3,7 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import { Client } from "pg";
 import { env } from "~/env";
 
-const client = new Client({
+export const client = new Client({
   connectionString: env.DATABASE_URL,
 });
 

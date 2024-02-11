@@ -14,9 +14,13 @@ import { verifyEmailVerificationToken } from "~/server/utils/auth/verification-t
 import { api } from "~/trpc/server";
 
 const Page = async ({
-  searchParams: { userId, error },
+  searchParams: { userId, error, redirectTo },
 }: {
-  searchParams: { userId?: string | null; error?: string | null };
+  searchParams: {
+    userId?: string | null;
+    error?: string | null;
+    redirectTo?: string | null;
+  };
 }) => {
   if (!userId) {
     return <p>No user id to verify!</p>;
@@ -97,7 +101,17 @@ const Page = async ({
             sameSite: true,
           });
 
-          redirect("/");
+          if (res.refreshToken) {
+            cookieStore.set("refresh-token", res.refreshToken, {
+              httpOnly: true,
+              secure: env.NODE_ENV === "production" ? true : false,
+              maxAge: 60 * 60 * 24 * 7,
+              path: "/",
+              sameSite: true,
+            });
+          }
+
+          redirect(redirectTo ?? "/");
         }}
       >
         <Label htmlFor="code_input">6 digit code</Label>

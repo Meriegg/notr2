@@ -1,15 +1,10 @@
 import { XIcon } from "lucide-react";
-import { cookies } from "next/headers";
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { z } from "zod";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { env } from "~/env";
-import { createEmailVerificationToken } from "~/server/utils/auth/verification-tokens/email-verification";
-import { api } from "~/trpc/server";
+import { loginAction } from "~/server/actions/login";
 
 const Page = ({
   searchParams: { error },
@@ -49,45 +44,7 @@ const Page = ({
         </Link>
       </p>
 
-      <form
-        className="flex w-full flex-col gap-2"
-        action={async (data) => {
-          "use server";
-          const cookieStore = cookies();
-
-          const formData = {
-            email: data.get("email"),
-          };
-
-          const submitData = z
-            .object({
-              email: z.string().email(),
-            })
-            .parse(formData);
-
-          const apiData = await api.auth.login
-            .mutate({ ...submitData })
-            .catch((error) => {
-              console.error(error);
-              redirect(
-                `/login?error=${error?.message ?? "Something went wrong"}`,
-              );
-            });
-
-          const emailVerificationToken = createEmailVerificationToken({
-            userId: apiData.userId,
-          });
-          cookieStore.set("email-verification-token", emailVerificationToken, {
-            maxAge: 60 * 60 * 12,
-            path: "/",
-            secure: env.NODE_ENV === "production" ? true : false,
-            httpOnly: true,
-            sameSite: true,
-          });
-
-          redirect(`/verify?userId=${apiData.userId}`);
-        }}
-      >
+      <form className="flex w-full flex-col gap-2" action={loginAction}>
         <Label htmlFor="email_input">Email</Label>
         <Input
           id="email_input"

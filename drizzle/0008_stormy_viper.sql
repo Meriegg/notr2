@@ -1,0 +1,1 @@
+ALTER TABLE "notes" ADD COLUMN "softDeleted" boolean DEFAULT false;

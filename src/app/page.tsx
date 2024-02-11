@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation";
-import { getSession } from "~/server/utils/auth/get-session";
+import { getUserAuthData } from "~/server/utils/auth/get-user-auth-data";
 
 export default async function Home() {
-  const userData = await getSession();
-  if (userData.error) {
+  const userData = await getUserAuthData();
+  if (userData?.error) {
     redirect("/login");
   }
 

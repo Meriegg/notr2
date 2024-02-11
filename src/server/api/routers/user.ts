@@ -1,6 +1,8 @@
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { createTRPCRouter, privateProcedure } from "../trpc";
 import { folders, notes } from "~/server/db/schema";
+import { TRPCError } from "@trpc/server";
+import { z } from "zod";
 
 export type FileTreeItem =
   | {
@@ -50,7 +52,7 @@ export const userRouter = createTRPCRouter({
             noteId: note.id,
           }));
 
-        return [...foldersInParent, ...notesInParent];
+        return [...foldersInParent, ...notesInParent] as FileTreeItem[];
       };
 
       fileTree = buildFileTree(null);
@@ -58,4 +60,180 @@ export const userRouter = createTRPCRouter({
       return { userNotes, userFolders, fileTree };
     },
   ),
+  getNote: privateProcedure
+    .input(
+      z.object({
+        noteId: z.string(),
+      }),
+    )
+    .query(async ({ ctx: { db, userAuthData }, input: { noteId } }) => {
+      const [note] = await db
+        .select()
+        .from(notes)
+        .where(
+          sql`${notes.id} = ${noteId} AND ${notes.userId} = ${userAuthData.userData!.id}`,
+        );
+      if (!note) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "This note does not exist.",
+        });
+      }
+
+      return note;
+    }),
+  createNote: privateProcedure
+    .input(
+      z
+        .object({
+          folderId: z.string().optional(),
+        })
+        .optional(),
+    )
+    .mutation(async ({ ctx: { db, userAuthData }, input }) => {
+      const [noteData] = await db
+        .insert(notes)
+        .values({
+          title: "Untitled",
+          userId: userAuthData.userData!.id,
+          tags: [],
+          content: "",
+          folderId: input?.folderId,
+        })
+        .returning({ noteId: notes.id });
+      if (!noteData?.noteId) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Failed to create note.",
+        });
+      }
+
+      return { noteId: noteData?.noteId };
+    }),
+  createFolder: privateProcedure
+    .input(
+      z.object({
+        parentFolderId: z.string().optional(),
+        folderName: z.string(),
+      }),
+    )
+    .mutation(
+      async ({
+        ctx: { db, userAuthData },
+        input: { parentFolderId, folderName },
+      }) => {
+        const [folderData] = await db
+          .insert(folders)
+          .values({
+            userId: userAuthData.userData!.id,
+            name: folderName,
+            parentFolderId,
+          })
+          .returning({ folderId: folders.id });
+        if (!folderData?.folderId) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Unable to create folder.",
+          });
+        }
+
+        return {
+          folderId: folderData.folderId,
+        };
+      },
+    ),
+  updateNote: privateProcedure
+    .input(
+      z.object({
+        noteId: z.string(),
+        content: z.string(),
+        title: z.string(),
+        tags: z.string().array(),
+      }),
+    )
+    .mutation(
+      async ({
+        ctx: { db, userAuthData },
+        input: { content, title, tags, noteId },
+      }) => {
+        const [noteData] = await db
+          .update(notes)
+          .set({
+            content: content,
+            title: !!title ? title : "Untitled",
+            tags: tags ?? [],
+          })
+          .where(
+            sql`${notes.id} = ${noteId} AND ${notes.userId} = ${userAuthData.userData!.id}`,
+          )
+          .returning({ noteId: notes.id });
+        if (!noteData?.noteId) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message:
+              "This note either does not exist or does not belong to you.",
+          });
+        }
+
+        return { noteData, editDate: new Date() };
+      },
+    ),
+  deleteNote: privateProcedure
+    .input(
+      z.object({
+        noteId: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx: { db, userAuthData }, input: { noteId } }) => {
+      await db
+        .delete(notes)
+        .where(
+          sql`${notes.id} = ${noteId} AND ${notes.userId} = ${userAuthData.userData!.id}`,
+        );
+
+      return { success: true };
+    }),
+  deleteFolder: privateProcedure
+    .input(
+      z.object({
+        folderId: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx: { db, userAuthData }, input: { folderId } }) => {
+      await db
+        .delete(folders)
+        .where(
+          sql`${folders.id} = ${folderId} AND ${folders.userId} = ${userAuthData.userData!.id}`,
+        );
+
+      return { success: true };
+    }),
+  renameFolder: privateProcedure
+    .input(
+      z.object({
+        folderId: z.string(),
+        newName: z.string(),
+      }),
+    )
+    .mutation(
+      async ({ ctx: { db, userAuthData }, input: { folderId, newName } }) => {
+        const [folderData] = await db
+          .update(folders)
+          .set({
+            name: newName,
+          })
+          .where(
+            sql`${folders.id} = ${folderId} AND ${folders.userId} = ${userAuthData.userData!.id}`,
+          )
+          .returning({ folderId: folders.id });
+        if (!folderData?.folderId) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "This note does not exist.",
+          });
+        }
+
+        return { folderData };
+      },
+    ),
 });

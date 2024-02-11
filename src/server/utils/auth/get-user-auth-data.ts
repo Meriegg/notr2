@@ -3,8 +3,15 @@ import { cookies } from "next/headers";
 import { db } from "~/server/db";
 import { userSessions, users } from "~/server/db/schema";
 import verifySignedString from "../crypto/verify-signed-string";
+import {
+  createRefreshToken,
+  verifyRefreshToken,
+} from "./verification-tokens/refresh-token";
+import { createUserSession } from "./create-user-session";
+import { env } from "~/env";
+import { redirect } from "next/navigation";
 
-export const getSession = async () => {
+const getUserAuthData_Main = async () => {
   try {
     const cookieStore = cookies();
     const authToken = cookieStore.get("auth-token")?.value;
@@ -12,6 +19,7 @@ export const getSession = async () => {
       return {
         error: true,
         message: "No auth token present",
+        refreshable: false,
       };
     }
 
@@ -19,6 +27,7 @@ export const getSession = async () => {
       return {
         error: true,
         message: "Invalid token format",
+        refreshable: false,
       };
     }
 
@@ -28,6 +37,7 @@ export const getSession = async () => {
       return {
         error: true,
         message: "Invalid token format",
+        refreshable: false,
       };
     }
 
@@ -39,15 +49,17 @@ export const getSession = async () => {
       return {
         error: true,
         message: "This session does not exist anymore.",
+        sessionToken,
+        refreshable: true,
       };
     }
 
     if (new Date().getTime() > session.expiresOn.getTime()) {
-      await db.delete(userSessions).where(eq(userSessions.id, session.id));
-
       return {
         error: true,
         message: "Session expired.",
+        sessionToken,
+        refreshable: true,
       };
     }
 
@@ -60,6 +72,7 @@ export const getSession = async () => {
       return {
         error: true,
         message: "Signature verification failed.",
+        refreshable: false,
       };
     }
 
@@ -72,12 +85,14 @@ export const getSession = async () => {
       return {
         error: true,
         message: "User does not exist.",
+        refreshable: false,
       };
     }
     if (!data?.user_sessions || !data?.users) {
       return {
         error: true,
         message: "Invalid data.",
+        refreshable: false,
       };
     }
 
@@ -91,6 +106,30 @@ export const getSession = async () => {
     return {
       error: true,
       message: error?.message ?? "You are not logged in.",
+      refreshable: false,
     };
   }
+};
+
+// The `Main` function is the one handling the actual logic of verifying
+// users. This one is just a wrapper around it to implement refresh tokens
+// in a cleaner way.
+export const getUserAuthData = async () => {
+  const userData = await getUserAuthData_Main();
+  if (userData.error) {
+    if (!userData?.refreshable || !userData?.sessionToken) {
+      return {
+        error: true,
+        message: userData?.message ?? "You are not logged in.",
+      };
+    }
+    redirect(`/refresh-session?sessionToken=${userData.sessionToken}`);
+  }
+
+  return {
+    session: userData.session!,
+    userData: userData.userData!,
+    error: false,
+    message: null,
+  };
 };

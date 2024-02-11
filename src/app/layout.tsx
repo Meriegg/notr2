@@ -1,13 +1,7 @@
 import "~/styles/globals.css";
 
-import { Inter } from "next/font/google";
-
 import { TRPCReactProvider } from "~/trpc/react";
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-sans",
-});
+import { Toaster } from "~/components/ui/toaster";
 
 export const metadata = {
   title: "Create T3 App",
@@ -22,8 +16,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body style={{ ...inter.style }}>
-        <TRPCReactProvider>{children}</TRPCReactProvider>
+      <body>
+        <TRPCReactProvider>
+          <Toaster />
+          {children}
+        </TRPCReactProvider>
       </body>
     </html>
   );

@@ -1,0 +1,1 @@
+ALTER TABLE "folders" ADD COLUMN "deleted" boolean DEFAULT false;

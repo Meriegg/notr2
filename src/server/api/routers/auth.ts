@@ -2,16 +2,14 @@ import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import {
   authVerificationCodes,
-  userSessions,
   users,
   verifiedEmails,
 } from "~/server/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
-import { v4 as uuid } from "uuid";
 import { sendVerificationCode } from "~/server/utils/auth/send-verification-code";
-import generateKeyPair from "~/server/utils/crypto/generate-key-pair";
-import createSignedString from "~/server/utils/crypto/create-signed-string";
+import { createUserSession } from "~/server/utils/auth/create-user-session";
+import { createRefreshToken } from "~/server/utils/auth/verification-tokens/refresh-token";
 
 export const authRouter = createTRPCRouter({
   signUp: publicProcedure
@@ -116,21 +114,13 @@ export const authRouter = createTRPCRouter({
         })
         .where(eq(authVerificationCodes.id, existingCode.id));
 
-      const sessionToken = uuid();
-
-      const keypair = generateKeyPair();
-      const signedSessionToken = createSignedString(sessionToken, keypair);
-
-      const authToken = `${sessionToken}:${signedSessionToken.signature}`;
-
-      // 6 hours into the future
-      const sessionExpirationDate = new Date(Date.now() + 6 * 3600000);
-      await db.insert(userSessions).values({
-        sessionToken,
-        userId,
-        expiresOn: sessionExpirationDate,
-        publicVerificationKey: signedSessionToken.publicKey,
+      const { authToken, sessionId } = await createUserSession({
+        userId: existingCode.userId,
       });
+
+      const refreshToken = sessionId
+        ? createRefreshToken({ userId: existingCode.userId, sessionId })
+        : null;
 
       if (existingCode.verifiedEmail) {
         const [existingVerifiedEmail] = await db
@@ -146,6 +136,6 @@ export const authRouter = createTRPCRouter({
         }
       }
 
-      return { authToken };
+      return { authToken, refreshToken };
     }),
 });

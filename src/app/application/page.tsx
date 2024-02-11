@@ -2,10 +2,10 @@ import { desc, eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { db } from "~/server/db";
 import { notes } from "~/server/db/schema";
-import { getSession } from "~/server/utils/auth/get-session";
+import { getUserAuthData } from "~/server/utils/auth/get-user-auth-data";
 
 const Page = async () => {
-  const userData = await getSession();
+  const userData = await getUserAuthData();
   if (userData.error || !userData.userData) {
     redirect("/login");
   }

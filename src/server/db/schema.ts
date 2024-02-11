@@ -102,7 +102,9 @@ export const notes = pgTable("notes", {
   title: varchar("title").notNull(),
   content: varchar("content").notNull(),
   tags: varchar("tags").array(),
-  folderId: uuid("folderId").references(() => folders.id),
+  folderId: uuid("folderId").references(() => folders.id, {
+    onDelete: "cascade",
+  }),
   userId: uuid("userId").notNull(),
   createdOn: timestamp("createdOn").defaultNow(),
 });

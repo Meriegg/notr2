@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation";
 import { Sidebar } from "~/components/application/sidebar";
-import { getSession } from "~/server/utils/auth/get-session";
+import { getUserAuthData } from "~/server/utils/auth/get-user-auth-data";
 
 const Layout = async ({ children }: { children: React.ReactNode }) => {
-  const userData = await getSession();
+  const userData = await getUserAuthData();
   if (userData.error) {
     redirect("/login");
   }
@@ -12,7 +12,12 @@ const Layout = async ({ children }: { children: React.ReactNode }) => {
     <div className="flex w-full items-start justify-start">
       <Sidebar />
 
-      <div className="min-h-[100vh] flex-1">{children}</div>
+      <div
+        className="min-h-[100vh] flex-1"
+        style={{ width: "min(1200px, 100%)" }}
+      >
+        {children}
+      </div>
     </div>
   );
 };
