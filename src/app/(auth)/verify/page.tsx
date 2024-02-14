@@ -96,7 +96,10 @@ const Page = async ({
           cookieStore.set("auth-token", res.authToken, {
             httpOnly: true,
             secure: env.NODE_ENV === "production" ? true : false,
-            maxAge: 60 * 60 * 6,
+            // The maxAge of the auth token is the same as the refresh token (7 days)
+            // because without the auth token, refreshing sessions is impossible
+            // (the session token inside the auth token is mandatory).
+            maxAge: 60 * 60 * 24 * 7,
             path: "/",
             sameSite: true,
           });

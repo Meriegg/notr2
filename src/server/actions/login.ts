@@ -42,6 +42,6 @@ export const loginAction = async (data: FormData) => {
   const finalRedirect = data.get("finalRedirect");
 
   redirect(
-    `/verify?userId=${apiData.userId}${finalRedirect && `&redirectTo=${finalRedirect}`}`,
+    `/verify?userId=${apiData.userId}${finalRedirect ? `&redirectTo=${finalRedirect}` : ""}`,
   );
 };

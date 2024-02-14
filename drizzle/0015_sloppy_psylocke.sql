@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS "serach_index" ON "notes" ("title","_onlytextcontent");

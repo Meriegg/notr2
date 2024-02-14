@@ -57,6 +57,7 @@ export const Editor = ({ note }: Props) => {
     title: z.string(),
     content: z.string(),
     tags: z.string().array(),
+    _parsedtextcontent: z.string(),
   });
 
   type FormData = z.infer<typeof ValidationSchema>;
@@ -66,11 +67,58 @@ export const Editor = ({ note }: Props) => {
       title: note.title,
       content: note.content,
       tags: note.tags ?? [],
+      _parsedtextcontent: "",
     },
   });
 
   const editor: BlockNoteEditor = useBlockNote({
     onEditorContentChange: (editor) => {
+      let finalText = "";
+
+      editor.forEachBlock((block) => {
+        finalText += "\n";
+
+        switch (block.type) {
+          case "paragraph":
+            block.content.forEach((entry) => {
+              if (entry.type === "text") finalText += entry.text;
+              if (entry.type === "link") finalText += entry.href;
+            });
+            break;
+          case "heading":
+            block.content.forEach((entry) => {
+              if (entry.type === "text") finalText += entry.text;
+              if (entry.type === "link") finalText += entry.href;
+            });
+            break;
+          case "bulletListItem":
+            block.content.forEach((entry) => {
+              if (entry.type === "text") finalText += entry.text;
+              if (entry.type === "link") finalText += entry.href;
+            });
+            break;
+          case "numberedListItem":
+            block.content.forEach((entry) => {
+              if (entry.type === "text") finalText += entry.text;
+              if (entry.type === "link") finalText += entry.href;
+            });
+            break;
+          case "table":
+            block.content.rows.forEach((row) => {
+              row.cells.forEach((cell) => {
+                cell.forEach((entry) => {
+                  if (entry.type === "text") finalText += entry.text;
+                  if (entry.type === "link") finalText += entry.href;
+                });
+              });
+            });
+            break;
+        }
+
+        return true;
+      });
+
+      form.setValue("_parsedtextcontent", finalText);
       form.setValue("content", JSON.stringify(editor.topLevelBlocks, null, 2));
     },
     initialContent: !!form.watch("content")
@@ -84,6 +132,7 @@ export const Editor = ({ note }: Props) => {
   const updateNote = api.user.updateNote.useMutation({
     onSuccess: () => {
       apiUtils.user.getUserFileTree.invalidate();
+      apiUtils.user.getNote.invalidate();
     },
   });
 
@@ -110,7 +159,7 @@ export const Editor = ({ note }: Props) => {
 
   return (
     <div
-      className="mx-auto mt-12 flex max-w-full flex-col gap-2"
+      className="mx-auto mt-12 flex max-w-full flex-col gap-2 px-2"
       style={{
         width: "min(1100px, 100%)",
       }}

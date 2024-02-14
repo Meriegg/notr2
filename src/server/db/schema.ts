@@ -1,4 +1,4 @@
-import { relations } from "drizzle-orm";
+import { SQL, relations, sql } from "drizzle-orm";
 import {
   pgTable,
   varchar,
@@ -6,6 +6,7 @@ import {
   uniqueIndex,
   timestamp,
   boolean,
+  index,
 } from "drizzle-orm/pg-core";
 
 export const users = pgTable(
@@ -107,6 +108,7 @@ export const notes = pgTable("notes", {
   }),
   userId: uuid("userId").notNull(),
   createdOn: timestamp("createdOn").defaultNow(),
+  _parsedtextcontent: varchar("_onlytextcontent"),
 });
 
 export const notesRelations = relations(notes, ({ one }) => ({

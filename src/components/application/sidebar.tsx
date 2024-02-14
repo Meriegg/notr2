@@ -1,15 +1,24 @@
 "use client";
 
-import { BlocksIcon, Loader2, PlusIcon, SearchIcon } from "lucide-react";
 import Link from "next/link";
+import {
+  BlocksIcon,
+  ChevronLeft,
+  Loader2,
+  PlusIcon,
+  SearchIcon,
+} from "lucide-react";
 import { api } from "~/trpc/react";
-import { Button } from "../ui/button";
+import { Button, buttonVariants } from "../ui/button";
 import { FileTreeDisplay } from "./file-tree-display";
 import { useFileTree } from "~/lib/zustand/file-tree";
 import { useRouter } from "next/navigation";
 import { FileTreeActions } from "./file-tree-actions";
+import { useState } from "react";
+import { cn } from "~/lib/utils";
 
 export const Sidebar = () => {
+  const [isClosed, setIsClosed] = useState(false);
   const fileTree = useFileTree();
   const router = useRouter();
   const userData = api.user.userData.useQuery();
@@ -28,32 +37,58 @@ export const Sidebar = () => {
   });
 
   return (
-    <div className="flex max-h-[100vh] min-h-[100vh] w-[300px] flex-col gap-0 overflow-y-auto border-r-[1px]">
-      <Link
-        href="/application/account"
-        className="w-full border-b-[1px] border-neutral-100 p-4 text-sm text-neutral-900 hover:bg-neutral-50"
-      >
-        {userData.isLoading && (
-          <Loader2 className="flex h-4 w-4 animate-spin items-center justify-center text-neutral-700" />
-        )}
-        {!userData.isLoading && !userData.isError && (
-          <>
-            <p className="font-semibold">{userData.data?.userData?.username}</p>
-            <p className="truncate text-neutral-700">
-              {userData.data?.userData?.email}
-            </p>
-          </>
-        )}
-      </Link>
+    <div
+      className={cn(
+        "flex max-h-[100vh] min-h-[100vh] flex-col gap-0 overflow-y-auto border-r-[1px] bg-white transition-all duration-300",
+        isClosed ? "w-[100px]" : "w-[300px]",
+        !isClosed && "fixed inset-0 z-[50] w-[300px] md:relative",
+      )}
+    >
+      <div className="group relative w-full border-b-[1px] border-neutral-100 p-4 text-sm text-neutral-900 hover:bg-neutral-50">
+        <Link href="/application/account">
+          {userData.isLoading && (
+            <Loader2 className="flex h-4 w-4 animate-spin items-center justify-center text-neutral-700" />
+          )}
+          {!userData.isLoading && !userData.isError && (
+            <>
+              <p className="font-semibold">
+                {userData.data?.userData?.username}
+              </p>
+              <p className="truncate text-neutral-700">
+                {userData.data?.userData?.email}
+              </p>
+            </>
+          )}
+        </Link>
 
-      <div className="flex flex-col gap-1 px-2 py-1">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="w-full justify-start gap-2 text-left"
+        <div className="absolute right-0 top-0 flex h-full items-center justify-center bg-white px-2 transition-all duration-300 group-hover:opacity-100 md:opacity-0">
+          <Button
+            size="icon"
+            variant="secondary"
+            onClick={() => setIsClosed(!isClosed)}
+          >
+            <ChevronLeft
+              className={cn(
+                "h-3 w-3 rotate-0 transform transition-all duration-300",
+                isClosed && "rotate-180",
+              )}
+            />
+          </Button>
+        </div>
+      </div>
+
+      <div className="flex max-w-full flex-col gap-1 px-2 py-1">
+        <Link
+          href="/application/search"
+          className={buttonVariants({
+            className: "w-full !justify-start gap-2 !text-left",
+            variant: "ghost",
+            size: "sm",
+          })}
         >
-          <SearchIcon className="h-3 w-3 text-inherit" /> Search
-        </Button>
+          <SearchIcon className="max-h-3 min-h-3 min-w-3 max-w-3 text-inherit" />{" "}
+          <span className="truncate">Search</span>
+        </Link>
 
         <Button
           className="w-full justify-start gap-2 text-left"
@@ -61,7 +96,8 @@ export const Sidebar = () => {
           size="sm"
           onClick={() => newNote.mutate()}
         >
-          <PlusIcon className="h-3 w-3 text-inherit" /> New note
+          <PlusIcon className="max-h-3 min-h-3 min-w-3 max-w-3 text-inherit" />{" "}
+          <span className="truncate">New note</span>
         </Button>
 
         <Button
@@ -69,7 +105,8 @@ export const Sidebar = () => {
           size="sm"
           className="w-full justify-start gap-2 text-left"
         >
-          <BlocksIcon className="h-3 w-3 text-inherit" /> Connected extensions{" "}
+          <BlocksIcon className="max-h-3 min-h-3 min-w-3 max-w-3 text-inherit" />{" "}
+          <span className="truncate">Connected extensions</span>{" "}
         </Button>
       </div>
 

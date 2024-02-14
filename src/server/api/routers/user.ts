@@ -149,12 +149,13 @@ export const userRouter = createTRPCRouter({
         content: z.string(),
         title: z.string(),
         tags: z.string().array(),
+        _parsedtextcontent: z.string(),
       }),
     )
     .mutation(
       async ({
         ctx: { db, userAuthData },
-        input: { content, title, tags, noteId },
+        input: { content, title, tags, noteId, _parsedtextcontent },
       }) => {
         const [noteData] = await db
           .update(notes)
@@ -162,6 +163,7 @@ export const userRouter = createTRPCRouter({
             content: content,
             title: !!title ? title : "Untitled",
             tags: tags ?? [],
+            _parsedtextcontent,
           })
           .where(
             sql`${notes.id} = ${noteId} AND ${notes.userId} = ${userAuthData.userData!.id}`,
