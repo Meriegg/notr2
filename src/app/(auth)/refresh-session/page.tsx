@@ -74,7 +74,7 @@ const Page = ({
             cookieStore.set("auth-token", newSession.authToken, {
               httpOnly: true,
               secure: env.NODE_ENV === "production" ? true : false,
-              maxAge: 60 * 60 * 6,
+              maxAge: 60 * 60 * 24 * 7,
               path: "/",
               sameSite: true,
             });
