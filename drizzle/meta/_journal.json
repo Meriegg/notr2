@@ -127,6 +127,13 @@
       "when": 1707854737100,
       "tag": "0017_wooden_dormammu",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "5",
+      "when": 1709046624129,
+      "tag": "0018_bizarre_raider",
+      "breakpoints": true
     }
   ]
 }

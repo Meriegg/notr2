@@ -1,4 +1,4 @@
-import { SQL, relations, sql } from "drizzle-orm";
+import { relations } from "drizzle-orm";
 import {
   pgTable,
   varchar,
@@ -6,7 +6,6 @@ import {
   uniqueIndex,
   timestamp,
   boolean,
-  index,
 } from "drizzle-orm/pg-core";
 
 export const users = pgTable(
@@ -23,6 +22,27 @@ export const users = pgTable(
   (users) => {
     return { emailIndex: uniqueIndex("email_index").on(users.email) };
   },
+);
+
+export const authorizedExtensions = pgTable("authorized_extensions", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  extensionName: varchar("extensionName", { length: 30 }).notNull(),
+  userId: uuid("userId")
+    .references(() => users.id)
+    .notNull(),
+  issuedOn: timestamp("issuedOn").defaultNow().notNull(),
+  authorizedOn: timestamp("authorizedOn"),
+  isRestricted: boolean("isRestricted").default(false).notNull(),
+});
+
+export const authorizedExtensionsRelations = relations(
+  authorizedExtensions,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [authorizedExtensions.userId],
+      references: [users.id],
+    }),
+  }),
 );
 
 export const userRelations = relations(users, ({ many }) => ({

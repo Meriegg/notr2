@@ -100,14 +100,17 @@ export const Sidebar = () => {
           <span className="truncate">New note</span>
         </Button>
 
-        <Button
-          variant="ghost"
-          size="sm"
-          className="w-full justify-start gap-2 text-left"
+        <Link
+          href="/application/extensions"
+          className={buttonVariants({
+            className: "w-full !justify-start gap-2 !text-left",
+            variant: "ghost",
+            size: "sm",
+          })}
         >
           <BlocksIcon className="max-h-3 min-h-3 min-w-3 max-w-3 text-inherit" />{" "}
           <span className="truncate">Connected extensions</span>{" "}
-        </Button>
+        </Link>
       </div>
 
       <hr className="border-neutral-100" />
