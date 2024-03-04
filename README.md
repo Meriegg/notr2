@@ -15,15 +15,21 @@ The only things you need to self host this app is a PostgreSQL database and pnpm
 
 After you set up your database you can clone the repo by running
 
-```git clone https://github.com/Meriegg/notr2.git```
+```
+git clone https://github.com/Meriegg/notr2.git
+```
 
 After that you need to install the packages:
 
-```pnpm install```
+```
+pnpm install
+```
 
 Now you need to set up the environment variables (see .env.example):
 
-```touch .env```
+```
+touch .env
+```
 
 Contents:
 
@@ -33,11 +39,20 @@ SECRET_KEY="p8kKZ81mrSi42G8D30wulFyviYhc7X98fKsRd68qzrs=" # 32 character string
 NODE_ENV="production" # can also be set to `development`
 ```
 
+After this you need to build your app:
+
+```
+pnpm run build
+```
+
 And now you can start your app!
 
-```pnpm run start```
+```
+pnpm run start
+```
+
+# Docker guide 
 
 Docker guide is coming soon.
 
 # Enjoy!
-
