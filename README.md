@@ -16,7 +16,7 @@ The only things you need to self host this app are a PostgreSQL database and pnp
 After you set up your database you can clone the repo by running
 
 ```
-git clone https://github.com/Meriegg/notr2.git
+git clone https://github.com/Meriegg/notr.git
 ```
 
 After that you need to install the packages:
