@@ -1,28 +1,43 @@
-# Create T3 App
+# Why?
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+I made this application to help me manage my text files.
 
-## What's next? How do I make an app with this?
+# Features
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+This application provides the following features:
+1. A file tree where you can create/nest folders and notes allowing you to structure your notes in such a way that you can easily find whatever you are searching for.
+2. A chrome extension providing you fast access to your notes (useful if you store passwords in your notes) 
+3. It is fully self-hostable, in fact you have to self host it in order to use it, removing any security risks that come with these types of apps.
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+# How can you self host it?
 
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
+The only things you need to self host this app is a PostgreSQL database and pnpm version 8.14.1 or higher (older version may also work, but if you face any issues, just update pnpm by running `npm install pnpm -G`).
 
-## Learn More
+After you set up your database you can clone the repo by running
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+`git clone https://github.com/Meriegg/notr2.git`
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+After that you need to install the packages:
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
+`pnpm install`
 
-## How do I deploy this?
+Now you need to set up the environment variables (see .env.example):
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+`touch .env`
+
+Contents:
+
+```
+DATABASE_URL="postgres://postgres:postgres@localhost:5432/notr" # only an example
+SECRET_KEY="p8kKZ81mrSi42G8D30wulFyviYhc7X98fKsRd68qzrs=" # 32 character string
+NODE_ENV="production" # can also be set to `development`
+```
+
+And now you can start your app!
+
+`pnpm run start`
+
+Docker guide is coming soon.
+
+# Enjoy!
+
