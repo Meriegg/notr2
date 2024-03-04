@@ -11,7 +11,7 @@ This application provides the following features:
 
 # How can you self host it?
 
-The only things you need to self host this app is a PostgreSQL database and pnpm version 8.14.1 or higher (older version may also work, but if you face any issues, just update pnpm by running `npm install pnpm -G`).
+The only things you need to self host this app are a PostgreSQL database and pnpm version 8.14.1 or higher (older version may also work, but if you face any issues, just update pnpm by running `npm install pnpm -G`).
 
 After you set up your database you can clone the repo by running
 
