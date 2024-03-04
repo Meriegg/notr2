@@ -69,7 +69,7 @@ const Page = ({
 
           const apiData = await api.auth.signUp
             .mutate({ ...submitData })
-            .catch((error) => {
+            .catch((error: { message?: string | null }) => {
               console.error(error);
               redirect(
                 `/signUp?error=${error?.message ?? "Something went wrong"}`,

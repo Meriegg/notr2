@@ -3,7 +3,7 @@
 import "@blocknote/react/style.css";
 import { useDebounce } from "use-debounce";
 import { useForm } from "react-hook-form";
-import { BlockNoteEditor } from "@blocknote/core";
+import { BlockNoteEditor, BlockSchema } from "@blocknote/core";
 import { BlockNoteView, useBlockNote } from "@blocknote/react";
 import { Button } from "../ui/button";
 import {
@@ -122,7 +122,7 @@ export const Editor = ({ note }: Props) => {
       form.setValue("content", JSON.stringify(editor.topLevelBlocks, null, 2));
     },
     initialContent: !!form.watch("content")
-      ? JSON.parse(form.watch("content"))
+      ? (JSON.parse(form.watch("content")) as BlockSchema[])
       : undefined,
   });
 
@@ -131,14 +131,18 @@ export const Editor = ({ note }: Props) => {
   const apiUtils = api.useUtils();
   const updateNote = api.user.updateNote.useMutation({
     onSuccess: () => {
-      apiUtils.user.getUserFileTree.invalidate();
-      apiUtils.user.getNote.invalidate();
+      apiUtils.user.getUserFileTree
+        .invalidate()
+        .catch((error) => console.error(error));
+      apiUtils.user.getNote.invalidate().catch((error) => console.error(error));
     },
   });
 
   const deleteNote = api.user.deleteNote.useMutation({
     onSuccess: () => {
-      apiUtils.user.getUserFileTree.invalidate();
+      apiUtils.user.getUserFileTree
+        .invalidate()
+        .catch((error) => console.error(error));
       router.push("/application");
     },
     onError: (error) => {

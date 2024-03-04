@@ -29,7 +29,7 @@ const Page = async () => {
 
       {!extensions?.length && (
         <p className="my-8 w-full text-center text-sm text-neutral-700">
-          You don't have any connected extensions
+          You don&apos;t have any connected extensions
         </p>
       )}
 

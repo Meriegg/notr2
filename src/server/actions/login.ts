@@ -23,7 +23,7 @@ export const loginAction = async (data: FormData) => {
 
   const apiData = await api.auth.login
     .mutate({ ...submitData })
-    .catch((error) => {
+    .catch((error: { message?: string | null }) => {
       console.error(error);
       redirect(`/login?error=${error?.message ?? "Something went wrong"}`);
     });
@@ -39,7 +39,7 @@ export const loginAction = async (data: FormData) => {
     sameSite: true,
   });
 
-  const finalRedirect = data.get("finalRedirect");
+  const finalRedirect = data.get("finalRedirect")?.toString();
 
   redirect(
     `/verify?userId=${apiData.userId}${finalRedirect ? `&redirectTo=${finalRedirect}` : ""}`,

@@ -37,7 +37,9 @@ const FolderDeleteButton = ({ parentFolderId }: { parentFolderId: string }) => {
   const { toast } = useToast();
   const deleteFolder = api.user.deleteFolder.useMutation({
     onSuccess: () => {
-      apiUtils.user.getUserFileTree.invalidate();
+      apiUtils.user.getUserFileTree
+        .invalidate()
+        .catch((error) => console.error(error));
       router.push("/application");
     },
     onError: (error) => {
@@ -97,7 +99,9 @@ const FolderRenameNameButton = ({
   const { toast } = useToast();
   const renameFolder = api.user.renameFolder.useMutation({
     onSuccess: () => {
-      apiUtils.user.getUserFileTree.invalidate();
+      apiUtils.user.getUserFileTree
+        .invalidate()
+        .catch((error) => console.error(error));
       setNewName("");
     },
     onError: (error) => {
@@ -163,7 +167,9 @@ const CreateFolderButton = ({ parentFolderId }: Props) => {
   const apiUtils = api.useUtils();
   const newFolder = api.user.createFolder.useMutation({
     onSuccess: () => {
-      apiUtils.user.getUserFileTree.invalidate();
+      apiUtils.user.getUserFileTree
+        .invalidate()
+        .catch((error) => console.error(error));
     },
     onError: (error) => {
       toast({
@@ -230,7 +236,9 @@ export const FileTreeActions = ({ parentFolderId }: Props) => {
   const apiUtils = api.useUtils();
   const newNote = api.user.createNote.useMutation({
     onSuccess: (data) => {
-      apiUtils.user.getUserFileTree.invalidate();
+      apiUtils.user.getUserFileTree
+        .invalidate()
+        .catch((error) => console.error(error));
       router.push(`/application/${data.noteId}`);
     },
   });

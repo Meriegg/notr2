@@ -30,7 +30,9 @@ const authMiddleware = t.middleware(async ({ next, ctx }) => {
   if (userAuthData?.error) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
-      message: userAuthData?.message ?? "You are not logged in.",
+      message:
+        (userAuthData as { message?: string | null })?.message ??
+        "You are not logged in.",
     });
   }
 

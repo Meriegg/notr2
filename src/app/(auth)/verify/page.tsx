@@ -84,7 +84,7 @@ const Page = async ({
               code,
               userId,
             })
-            .catch((error) => {
+            .catch((error: { message?: string | null }) => {
               console.error(error);
               redirect(
                 `/verify?userId=${userId}&error=${error?.message ?? "Unable to verify code."}`,

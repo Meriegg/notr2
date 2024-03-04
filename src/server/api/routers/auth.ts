@@ -86,7 +86,7 @@ export const authRouter = createTRPCRouter({
         .where(
           sql`${authVerificationCodes.code} = ${code} AND ${authVerificationCodes.userId} = ${userId}`,
         );
-      if (!existingCode || !existingCode.expiresOn) {
+      if (!existingCode?.expiresOn) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
           message: "Invalid code",

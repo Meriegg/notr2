@@ -5,7 +5,7 @@ import { authorizedExtensions } from "~/server/db/schema";
 import { verifyExtensionJwt } from "~/server/utils/extensions/extension-jwt";
 
 export const POST = async (request: Request) => {
-  const jsonBody = await request.json();
+  const jsonBody = (await request.json()) as { extensionToken: string };
   const body = z.object({ extensionToken: z.string() }).parse(jsonBody);
 
   const extensionId = verifyExtensionJwt({ token: body.extensionToken });

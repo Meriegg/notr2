@@ -8,11 +8,14 @@ const Page = () => {
   const searchParams = useSearchParams();
   const apiUtils = api.useUtils();
   const router = useRouter();
-  apiUtils.user.invalidate().finally(() => {
-    const redirectTo = searchParams.get("redirectTo");
+  apiUtils.user
+    .invalidate()
+    .catch((error) => console.error(error))
+    .finally(() => {
+      const redirectTo = searchParams.get("redirectTo");
 
-    router.push(redirectTo ?? "/application");
-  });
+      router.push(redirectTo ?? "/application");
+    });
 
   return (
     <p className="flex w-full items-center gap-1 text-center text-sm text-neutral-700">

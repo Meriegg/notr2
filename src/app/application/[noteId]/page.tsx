@@ -13,7 +13,9 @@ const Page = () => {
     { noteId: (noteId as string) ?? "" },
     {
       onSuccess: () => {
-        apiUtils.user.getUserFileTree.invalidate();
+        apiUtils.user.getUserFileTree
+          .invalidate()
+          .catch((error) => console.error(error));
       },
     },
   );

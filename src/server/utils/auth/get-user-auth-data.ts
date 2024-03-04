@@ -45,7 +45,7 @@ const getUserAuthData_Main = async () => {
       .select()
       .from(userSessions)
       .where(eq(userSessions.sessionToken, sessionToken));
-    if (!session || !session.expiresOn) {
+    if (!session?.expiresOn) {
       return {
         error: true,
         message: "This session does not exist anymore.",
@@ -97,15 +97,17 @@ const getUserAuthData_Main = async () => {
     }
 
     return {
-      session: data.user_sessions!,
-      userData: data.users!,
+      session: data.user_sessions,
+      userData: data.users,
     };
-  } catch (error: any) {
+  } catch (error) {
     console.error(error);
 
     return {
       error: true,
-      message: error?.message ?? "You are not logged in.",
+      message:
+        (error as { message?: string | null })?.message ??
+        "You are not logged in.",
       refreshable: false,
     };
   }

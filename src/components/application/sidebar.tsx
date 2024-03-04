@@ -26,7 +26,9 @@ export const Sidebar = () => {
 
   const newNote = api.user.createNote.useMutation({
     onSuccess: (data) => {
-      apiUtils.user.getUserFileTree.invalidate();
+      apiUtils.user.getUserFileTree
+        .invalidate()
+        .catch((error) => console.error(error));
       router.push(`/application/${data.noteId}`);
     },
   });
