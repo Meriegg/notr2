@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { Server_LogOut } from "~/components/server/log-out";
 import { Button } from "~/components/ui/button";
 import { env } from "~/env";
 import { db } from "~/server/db";
@@ -96,10 +97,12 @@ const Page = ({
             Stay logged in
           </Button>
         </form>
+
         <form
           id="LOG_OUT_FORM"
           action={async () => {
             "use server";
+
             const cookieStore = cookies();
             cookieStore.delete("auth-token");
             cookieStore.delete("refresh-token");

@@ -1,13 +1,7 @@
-import { eq } from "drizzle-orm";
-import { db } from "~/server/db";
-import { notes } from "~/server/db/schema";
 import { getExtAuthData } from "~/server/utils/extensions/get-ext-auth-data";
+import { getUserFileTree } from "~/server/utils/other/get-user-file-tree";
 
 export const GET = async (request: Request) => {
-  return new Response("Test error", {
-    status: 401,
-  });
-
   const authData = await getExtAuthData(request.headers.get("Authorization"));
   if (authData.error) {
     return new Response(authData?.message ?? "Invalid auth params.", {
@@ -15,12 +9,13 @@ export const GET = async (request: Request) => {
     });
   }
 
-  const userNotes = await db
-    .select()
-    .from(notes)
-    .where(eq(notes.userId, authData.user!.id));
+  const { fileTree, userFolders, userNotes } = await getUserFileTree({
+    userId: authData.user!.id,
+  });
 
   return Response.json({
-    notes: userNotes,
+    fileTree,
+    userFolders,
+    userNotes,
   });
 };

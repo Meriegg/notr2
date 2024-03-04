@@ -35,7 +35,7 @@ const EntryDisplay = ({ entry }: { entry: FileTreeItem }) => {
           </div>
 
           {isFolderOpen && (
-            <div className="pl-4">
+            <div className="ml-[14px] border-l-[1px] border-neutral-200 pl-2">
               <FileTreeDisplay fileTree={entry.content} />
             </div>
           )}
